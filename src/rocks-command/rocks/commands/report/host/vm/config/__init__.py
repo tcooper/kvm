@@ -143,23 +143,23 @@ class Command(rocks.commands.report.host.command):
 		# check for a CDROM
 		#
 		cdrom_path = node.vm_defs.cdrom_path
+		returnxml.append("<disk type='file' device='cdrom'>")
+		returnxml.append("  <driver name='qemu' type='raw'/>")
 		if cdrom_path:
-			returnxml.append("<disk type='file' device='cdrom'>")
-			returnxml.append("  <driver name='qemu' type='raw'/>")
 			if cdrom_path.startswith('/dev'):
 				# block device
 				returnxml.append("  <source dev='%s'/>" % cdrom_path)
 			else:
 				# we assume it is a ISO file
 				returnxml.append("  <source file='%s'/>" % cdrom_path)
-			# find the ide device
-			for i in ['a', 'b', 'c', 'd']:
-				device = 'hd' + i
-				if device not in idedevices:
-					break
-			returnxml.append("  <target dev='%s' bus='ide'/>"% device)
-			returnxml.append("  <readonly/>")
-			returnxml.append("</disk>")
+		# find the ide device
+		for i in ['a', 'b', 'c', 'd']:
+			device = 'hd' + i
+			if device not in idedevices:
+				break
+		returnxml.append("  <target dev='%s' bus='ide'/>"% device)
+		returnxml.append("  <readonly/>")
+		returnxml.append("</disk>")
 
 		return returnxml
 
@@ -268,12 +268,14 @@ class Command(rocks.commands.report.host.command):
 			netmask = None
 			dns = None
 			gateway = None
+			mac = None
 			if node.name in self.getHostnames( [ 'frontend' ]):
 				subnet = 'public'
 				for network in node.networks:
 					if network.subnet.name == 'public':
 						ip = network.ip
 						netmask = network.subnet.netmask
+						mac = network.mac
 				
 				dns = self.newdb.getHostAttr(node,
 					'Kickstart_PublicDNSServers')
@@ -296,6 +298,8 @@ class Command(rocks.commands.report.host.command):
 			if gateway:
 			        bootargs += ' gateway=%s ' % gateway
 			
+			if mac:
+				bootargs = bootargs.replace("ksdevice=eth1","ksdevice=%s" % mac)
 			returnxml.append("    <kernel>%s</kernel>" % bootaction.kernel )
 			returnxml.append("    <initrd>%s</initrd>" % bootaction.ramdisk )
 			returnxml.append("    <cmdline>%s</cmdline>" % bootargs )
@@ -366,7 +370,37 @@ class Command(rocks.commands.report.host.command):
 				break
 
 		# the extra devices
-		devicexml.append("    <graphics type='vnc' port='-1' keymap='en-us'/>")
+
+		# Add the USB tablet device for proper mouse tracking...
+		devicexml.append("    <input type='tablet' bus='usb'/>")
+
+		# If defined as an attibute add a password to the vnc 
+		# configuration. NOTE: This is REQUIRED to be able to change
+		# and/or use VNC password auth later in the guest as guest
+		# MUST be started with the --vnc 127.0.0.1:1,passwd option
+		# to support password authentiation. Alternate authentication
+		# methods (ie. sasl2, tls, etc) will require a different
+		# implementation but are more secure. 
+		vnc_passwd = self.newdb.getHostAttr(node, 'vnc_passwd')
+		if (vnc_passwd) and (vnc_passwd.lower() == 'true'):
+			import random
+			import string
+			import datetime
+
+                        vncpasswd = ''.join(
+                                random.SystemRandom().choice(
+                                string.ascii_uppercase +
+                                string.ascii_lowercase +
+                                string.digits) for _ in range(16))
+
+			dt1 = datetime.datetime.utcnow()
+			dt2 = dt1 + datetime.timedelta(0, 3600)
+			timestr = dt2.strftime("%Y-%m-%dT%H:%M:%S")
+
+			xml_str = "    <graphics type='vnc' port='-1' passwd='%s' passwdValidUntil='%s' keymap='en-us'/>" % (vncpasswd, timestr)
+			devicexml.append(xml_str)
+		else:
+			devicexml.append("    <graphics type='vnc' port='-1' keymap='en-us'/>")
 		devicexml.append("    <console tty='/dev/pts/0'/>")
 		devicexml.append("  </devices>")
 		xmlconfig = xmlconfig + self.runXMLPlugin(plugins, 'plugin_device',
