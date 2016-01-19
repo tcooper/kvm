@@ -2,12 +2,12 @@
 #
 
 """
-This class add some functions used only by the kvm roll to the 
+This class add some functions used only by the kvm roll to the
 rocks.db.helper.DatabaseHelper class
 
 
-If a KVM package needs this extra function should simply import this 
-package which will make the method below available from the class 
+If a KVM package needs this extra function should simply import this
+package which will make the method below available from the class
 rocks.db.helper.DatabaseHelper
 
 """
@@ -204,69 +204,69 @@ def getStatus(node):
 	return state
 
 def getGraphics(node, flags):
-	"""given a node (of type Node) it returns its graphics device attributes"""
+    """given a node (of type Node) it returns its graphics device attributes"""
 
-	if not (node.vm_defs and node.vm_defs.physNode):
-		return 'nostate-error'
+    if not (node.vm_defs and node.vm_defs.physNode):
+        return 'nostate-error'
 
-	physhost = node.vm_defs.physNode.name
-	graphics = 'unknown'
+    physhost = node.vm_defs.physNode.name
+    graphics = 'unknown'
 
-	try:
-		import rocks.vmconstant
-		hipervisor = libvirt.open(rocks.vmconstant.connectionURL % physhost)
-	except libvirt.libvirtError:
-		#import traceback
-		#traceback.print_exc()
-		return graphics
+    try:
+        import rocks.vmconstant
+        hipervisor = libvirt.open(rocks.vmconstant.connectionURL % physhost)
+    except libvirt.libvirtError:
+        #import traceback
+        # traceback.print_exc()
+        return graphics
 
-	found = 0
-	for id in hipervisor.listDomainsID():
-		if id == 0:
-			#
-			# skip dom0
-			#
-			continue
+    found = 0
+    for id in hipervisor.listDomainsID():
+        if id == 0:
+            #
+            # skip dom0
+            #
+            continue
 
-		domU = hipervisor.lookupByID(id)
-		if domU.name() == node.name:
-			found = 1
-			break
+        domU = hipervisor.lookupByID(id)
+        if domU.name() == node.name:
+            found = 1
+            break
 
-	if found:
-		from xml.dom.minidom import parse, parseString
+    if found:
+        from xml.dom.minidom import parse, parseString
 
-		graphics_type = ''
-		port = ''
-		autoport = ''
-		listen = ''
-		keymap = ''
+        graphics_type = ''
+        port = ''
+        autoport = ''
+        listen = ''
+        keymap = ''
 
-		# Grab the current XML definition of the domain...
-		domU_xml = parseString(domU.XMLDesc(flags))
+        # Grab the current XML definition of the domain...
+        domU_xml = parseString(domU.XMLDesc(flags))
 
-		# Parse out the <graphics>...</graphics> device node...
-		for gd in domU_xml.getElementsByTagName('graphics'):
-			xml = gd.toxml()
+        # Parse out the <graphics>...</graphics> device node...
+        for gd in domU_xml.getElementsByTagName('graphics'):
+            xml = gd.toxml()
 
-		# Retrieve the graphics connection attributes...
-		if gd.hasAttribute('type'):
-			graphics_type = gd.getAttribute('type')
-		if gd.hasAttribute('listen'):
-			listen = gd.getAttribute('listen')
-		if gd.hasAttribute('port'):
-			port = gd.getAttribute('port')
-		if gd.hasAttribute('keymap'):
-			keymap = gd.getAttribute('keymap')
+        # Retrieve the graphics connection attributes...
+        if gd.hasAttribute('type'):
+            graphics_type = gd.getAttribute('type')
+        if gd.hasAttribute('listen'):
+            listen = gd.getAttribute('listen')
+        if gd.hasAttribute('port'):
+            port = gd.getAttribute('port')
+        if gd.hasAttribute('keymap'):
+            keymap = gd.getAttribute('keymap')
 
-		graphics = "%s;%s;%s;%s" % (graphics_type, listen, port, keymap)
+        graphics = "%s;%s;%s;%s" % (graphics_type, listen, port, keymap)
 
-		if flags & libvirt.VIR_DOMAIN_XML_SECURE:
-			if gd.hasAttribute('passwd'):
-				passwd = gd.getAttribute('passwd')
-				graphics += ";%s" % (passwd)
-			if gd.hasAttribute('passwdValidTo'):
-				passwdValidTo = gd.getAttribute('passwdValidTo')
-				graphics += ";%s" % (passwdValidTo)
+        if flags & libvirt.VIR_DOMAIN_XML_SECURE:
+            if gd.hasAttribute('passwd'):
+                passwd = gd.getAttribute('passwd')
+                graphics += ";%s" % (passwd)
+            if gd.hasAttribute('passwdValidTo'):
+                passwdValidTo = gd.getAttribute('passwdValidTo')
+                graphics += ";%s" % (passwdValidTo)
 
-	return graphics
+    return graphics
