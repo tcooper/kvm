@@ -1,4 +1,5 @@
 ROLLNAME = kvm
+VERSION = 6.2.1
 RELEASE = 0
 COLOR   = OliveDrab
 
