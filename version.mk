@@ -1,6 +1,6 @@
 ROLLNAME = kvm
 VERSION = 6.2.1
-RELEASE = 0
+RELEASE = 1
 COLOR   = OliveDrab
 
 REDHAT.ROOT = $(PWD)
