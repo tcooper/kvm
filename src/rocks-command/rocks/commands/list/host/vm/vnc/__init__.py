@@ -102,26 +102,26 @@ class Command(rocks.commands.list.host.command):
         # spit it out!
         info = [physhost]
 
-            flags = 0
+        flags = 0
 
-                if showpassword:
-                    import libvirt
-                    flags |= libvirt.VIR_DOMAIN_XML_SECURE
-                    info += rocks.db.vmextend.getGraphics(
-                        host, flags).split(';')
-                else:
-                    info += rocks.db.vmextend.getGraphics(
-                        host, flags).split(';')
+        if showpassword:
+            import libvirt
+            flags |= libvirt.VIR_DOMAIN_XML_SECURE
+            info += rocks.db.vmextend.getGraphics(
+                host, flags).split(';')
+        else:
+            info += rocks.db.vmextend.getGraphics(
+                host, flags).split(';')
 
-                self.addOutput(host.name, info)
+        self.addOutput(host.name, info)
 
-            header = ['vm-host', 'phys-host',
-                      'type', 'listen', 'port', 'keymap']
+    header = ['vm-host', 'phys-host',
+              'type', 'listen', 'port', 'keymap']
 
-            if showpassword:
-                header.append('password')
-                header.append('validto')
+    if showpassword:
+        header.append('password')
+        header.append('validto')
 
-            self.endOutput(header)
+    self.endOutput(header)
 
 RollName = "kvm"
