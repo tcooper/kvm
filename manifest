@@ -1,3 +1,7 @@
+foundation-python-daemon
+foundation-python-lockfile
 rocks-command-kvm
-rocks-airboss
+rocks-kvm-server-init
+rocks-kvm-vlan-init
 roll-kvm-kickstart
+roll-kvm-usersguide
