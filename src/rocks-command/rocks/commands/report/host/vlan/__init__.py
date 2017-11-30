@@ -4,9 +4,10 @@
 # 
 # 				Rocks(r)
 # 		         www.rocksclusters.org
-# 		         version 6.2 (SideWinder)
+# 		         version 6.2 (SideWindwer)
+# 		         version 7.0 (Manzanita)
 # 
-# Copyright (c) 2000 - 2014 The Regents of the University of California.
+# Copyright (c) 2000 - 2017 The Regents of the University of California.
 # All rights reserved.	
 # 
 # Redistribution and use in source and binary forms, with or without
@@ -65,8 +66,12 @@ from rocks.db.mappings.kvm import *
 import rocks.db.mappings.kvm
 import rocks.db.vmextend
 import rocks.commands
+import rocks
 
 networking_file = '/etc/libvirt/networking/vlan.conf'
+if rocks.version_major == '7':
+	networking_file = '/etc/libvirt/qemu/networks/vlan.conf'
+	
 
 class Command(rocks.commands.HostArgumentProcessor,
         rocks.commands.report.command):
@@ -104,9 +109,9 @@ class Command(rocks.commands.HostArgumentProcessor,
 				ret += "ip link show %s.%s > /dev/null 2>&1 ||" % \
 						(device, vlanid)
 
-				ret += "vconfig add %s %s && ifconfig %s.%s up &&" \
+				ret += "ip link add link %s name %s.%s type vlan id %s && ip link set %s up && ip link set %s.%s up &&" \
 					" ip link set arp off dev %s.%s;" % \
-					(device, vlanid, device, vlanid, device, vlanid)
+					(device, device, vlanid, vlanid, device, device, vlanid, device, vlanid)
 
 				self.vlanProcessed.add((physhost, device, vlanid))
 		if not ret:

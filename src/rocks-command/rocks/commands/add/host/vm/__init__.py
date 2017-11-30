@@ -4,9 +4,10 @@
 # 
 # 				Rocks(r)
 # 		         www.rocksclusters.org
-# 		         version 6.2 (SideWinder)
+# 		         version 6.2 (SideWindwer)
+# 		         version 7.0 (Manzanita)
 # 
-# Copyright (c) 2000 - 2014 The Regents of the University of California.
+# Copyright (c) 2000 - 2017 The Regents of the University of California.
 # All rights reserved.	
 # 
 # Redistribution and use in source and binary forms, with or without
@@ -232,6 +233,7 @@ import os
 import os.path
 import IPy
 
+import rocks
 import rocks.commands
 import rocks.vm
 from rocks.db.mappings.base import *
@@ -304,7 +306,7 @@ class Command(rocks.commands.HostArgumentProcessor, rocks.commands.add.command):
 
 	<param type='string' name='mem'>
 	The amount of memory in megabytes to assign to this VM.
-	The default is: 1024.
+	The default is: 2048.
 	</param>
 
 	<param type='string' name='cpus'>
@@ -638,11 +640,19 @@ class Command(rocks.commands.HostArgumentProcessor, rocks.commands.add.command):
 				'install vm' ] )
 
 		# HVMs boot just like real hardware
-		if virt_type == 'hvm':
+		if virt_type == 'hvm' and rocks.version_major == '7':
+			# No tracker is the default install for VMs
+			# Rocks 7 
 			self.command('set.host.installaction', [nodename, 
-					'install headless'])
+					'install notracker'])
+			self.command('add.host.attr',[nodename,'UseTracker','False'])
 			self.command('set.host.runaction', [nodename, 'os'])
 		#
+		if virt_type == 'hvm' and rocks.version_major != '7':
+			self.command('set.host.installaction', [nodename, 
+					'install'])
+			self.command('set.host.runaction', [nodename, 'os'])
+
 		# set the first boot state to 'install'
 		#
 		self.command('set.host.boot', [nodename, 'action=install'])
@@ -673,7 +683,7 @@ class Command(rocks.commands.HostArgumentProcessor, rocks.commands.add.command):
 				[('name', None),
 				('ip', None),
 				('subnet', 'private'),
-				('mem', 1024),
+				('mem', 2048),
 				('cpus', 1),
 				('slice', None),
 				('mac', None),

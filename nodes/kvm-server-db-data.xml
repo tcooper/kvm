@@ -48,7 +48,5 @@ All rights reserved. Rocks(tm) v5.3 www.rocksclusters.org
 /opt/rocks/bin/rocks set attr cpu_mode host-passthrough
 
 </post>
-
-
 </kickstart>
 

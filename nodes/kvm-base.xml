@@ -20,16 +20,17 @@ All rights reserved. Rocks(tm) v4.3 www.rocksclusters.org
 <package>bridge-utils</package>
 <package>qemu-kvm</package>
 <package>libvirt</package>
+<package>libvirt-python</package>
 
 
-<!-- no necessary but usefull  -->
+<!-- no necessary but useful  -->
 <!-- guestfish is broken in RHEL 6.3-->
-<package>guestfish</package>
+<package cond="rocks_version_major == 6">guestfish</package>
 <!-- losetup is in util-linux-ng -->
 <package>util-linux-ng</package>
 <package>qemu-kvm-tools</package>
 <package>virt-manager</package>
-<package>virt-p2v</package>
+<package cond="rocks_version_major == 6">virt-p2v</package>
 <package>virt-top</package>
 <package>virt-v2v</package>
 

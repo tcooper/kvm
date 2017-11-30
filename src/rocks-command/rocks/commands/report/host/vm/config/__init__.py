@@ -4,9 +4,10 @@
 # 
 # 				Rocks(r)
 # 		         www.rocksclusters.org
-# 		         version 6.2 (SideWinder)
+# 		         version 6.2 (SideWindwer)
+# 		         version 7.0 (Manzanita)
 # 
-# Copyright (c) 2000 - 2014 The Regents of the University of California.
+# Copyright (c) 2000 - 2017 The Regents of the University of California.
 # All rights reserved.	
 # 
 # Redistribution and use in source and binary forms, with or without
@@ -223,12 +224,14 @@ class Command(rocks.commands.report.host.command):
 			cpu_match_split = cpu_mode.split(':', 1)
 			if len(cpu_match_split) > 1:
 				# cpu mode contains inner tag of cpus
-				xmlconfig.append("  <cpu mode='" + cpu_match_split[0] + "'>")
+				xmlconfig.append("  <cpu>")
+				xmlconfig.append("   <mode>" + cpu_match_split[0] + "</mode>")
 				xmlconfig.append( cpu_match_split[1] )
 				xmlconfig.append("  </cpu>")
 			else:
-				xmlconfig.append("  <cpu mode='" +
-						cpu_mode + "'/>")
+				xmlconfig.append("  <cpu>")
+				xmlconfig.append("   <mode>" + cpu_mode + "</mode>")
+				xmlconfig.append("  </cpu>")
 
 		# for cpu pinning
 		attribute = self.newdb.getHostAttr(node, 'kvm_cpu_pinning')
